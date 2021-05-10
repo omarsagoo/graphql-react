@@ -6,15 +6,15 @@ function Weather() {
     const [ zip, setZip] = useState('')
     const [ weather, setWeather ] = useState(null)
     const [unit, setUnit] = useState('')
-    const [lat, setLat] = useState('')
-    const [long, setLong] = useState('')
+    const [lat, setLat] = useState(0.0)
+    const [long, setLong] = useState(0.0)
 
     async function getWeather() {
         try {
           const json = await client.query({
             query: gql`
               query {
-                getWeather(zip:${zip}, units:${unit}, lat:${lat}, long:${long}) {
+                getWeather(${zip !== '' ? "zip:" + zip + ',' : ''} ${unit !== '' ? "units:" + unit : ''} ${lat !== 0.0 ? "lat:" + lat + ',': ''} ${long !== 0.0 ? "long:" + long : ''}) {
                   temperature
                   description
                   cod
@@ -24,6 +24,8 @@ function Weather() {
             `
           })
           setWeather(json)
+        console.log(json)
+
         } catch(err) {
           console.log(err.message)
         }
@@ -31,7 +33,6 @@ function Weather() {
   
     return (
       <div className="Weather">
-
         {weather 
             ? 
             weather.data.getWeather.cod !== 200 
@@ -66,8 +67,8 @@ function Weather() {
             type="radio"
             onClick={(e) => {
                 navigator.geolocation.getCurrentPosition(pos => {
-                    setLat(String(pos.coords[0]))
-                    setLong(String(pos.coords[1]))
+                    setLat(pos.coords.latitude)
+                    setLong(pos.coords.longitude)
                 })
             }}
             /> use Coordinates
